@@ -1,5 +1,6 @@
 process.title = 'node-proxy';
 var net = require('net');
+var cache = require('./cache');
 var server = net.createServer(function (client) { //'connection' listener
     console.log('client connected');
     var auth = false;
@@ -65,6 +66,8 @@ var server = net.createServer(function (client) { //'connection' listener
         if (!remote) {
             remote = net.connect({host: destinationAddress, port: destinationPort}, function () {
                 console.log('connected to Remote ', destinationAddress, destinationPort);
+                remote.__host = destinationAddress;
+                remote.__port = destinationPort;
                 data[1] = 0x00;
                 client.write(new Buffer(data));
             });
@@ -99,7 +102,16 @@ var server = net.createServer(function (client) { //'connection' listener
             header[hName] = h.join(':').trim();
         });
         if (req.method == 'get' && req.query.match(/-\d+\.ts$/m)) {
-            console.log(data.toString());
+            return cache.download(remote.__host, remote.__port, data.toString())
+                .then(function (data) {
+                    client.write(data.reduce(function (a, b) {
+                        return a.concat(b)
+                    })[0]);
+                    remote.end();
+                })
+                .catch(function (err) {
+                    console.log(err.stack);
+                })
         }
         remote.write(data);
     });

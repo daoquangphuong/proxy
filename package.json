@@ -6,5 +6,6 @@
     "start": "supervisor app.js"
   },
   "dependencies": {
+    "q": "^1.4.1"
   }
 }
