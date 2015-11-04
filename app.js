@@ -83,7 +83,24 @@ var server = net.createServer(function (client) { //'connection' listener
             });
             return;
         }
-        console.log(data.toString());
+        // parse data
+        var dataList = data.toString().split('\r\n');
+        var request = dataList.shift();
+        request = request.replace(/\s+/g, ' ').split(' ');
+        var req = {
+            method: request[0].toLowerCase(),
+            query: request[1],
+            type: request[2]
+        };
+        var header = {};
+        dataList.forEach(function (pk) {
+            var h = pk.split(':');
+            var hName = h.shift().trim().toLowerCase();
+            header[hName] = h.join(':').trim();
+        });
+        if (req.method == 'get' && req.query.match(/-\d+\.ts$/m)) {
+            console.log(data.toString());
+        }
         remote.write(data);
     });
 
