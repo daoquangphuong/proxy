@@ -1,0 +1,10 @@
+{
+  "name": "node-proxy",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "supervisor app.js"
+  },
+  "dependencies": {
+  }
+}
